@@ -1,0 +1,699 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: mediar-postgres
+    environment:
+      POSTGRES_USER: mediar_user
+      POSTGRES_PASSWORD: mediar_password
+      POSTGRES_DB: mediar_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mediar_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Auth Service
+  auth-service:
+    build:
+      context: ./backend/auth-service
+      dockerfile: Dockerfile
+    container_name: mediar-auth-service
+    environment:
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mediar_db
+      DB_USER: mediar_user
+      DB_PASSWORD: mediar_password
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-in-development}
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # AI Triage Service
+  ai-triage-service:
+    build:
+      context: ./backend/ai-triage-service
+      dockerfile: Dockerfile
+    container_name: mediar-ai-triage-service
+    environment:
+      PORT: 3001
+      GCP_PROJECT_ID: ${GCP_PROJECT_ID}
+      GCP_LOCATION: ${GCP_LOCATION:-us-central1}
+      HIPAA_ENCRYPTION_KEY: ${HIPAA_ENCRYPTION_KEY:-change-me}
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+    ports:
+      - "3001:3001"
+    depends_on:
+      - auth-service
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Patient Data Service
+  patient-data-service:
+    build:
+      context: ./backend/patient-data-service
+      dockerfile: Dockerfile
+    container_name: mediar-patient-data-service
+    environment:
+      PORT: 3002
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mediar_db
+      DB_USER: mediar_user
+      DB_PASSWORD: mediar_password
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+      HIPAA_ENCRYPTION_KEY: ${HIPAA_ENCRYPTION_KEY:-change-me}
+    ports:
+      - "3002:3002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3002/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # WebRTC Signaling Service
+  webrtc-signal-service:
+    build:
+      context: ./backend/webrtc-signal-service
+      dockerfile: Dockerfile
+    container_name: mediar-webrtc-signal-service
+    environment:
+      PORT: 3003
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+      STUN_SERVER: ${STUN_SERVER:-stun:stun.l.google.com:19302}
+    ports:
+      - "3003:3003"
+      - "3003:3003/udp"
+    depends_on:
+      - auth-service
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3003/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # RPM Data Service
+  rpm-data-service:
+    build:
+      context: ./backend/rpm-data-service
+      dockerfile: Dockerfile
+    container_name: mediar-rpm-data-service
+    environment:
+      PORT: 3004
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mediar_db
+      DB_USER: mediar_user
+      DB_PASSWORD: mediar_password
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+    ports:
+      - "3004:3004"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3004/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Admin Service
+  admin-service:
+    build:
+      context: ./backend/admin-service
+      dockerfile: Dockerfile
+    container_name: mediar-admin-service
+    environment:
+      PORT: 3005
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mediar_db
+      DB_USER: mediar_user
+      DB_PASSWORD: mediar_password
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+    ports:
+      - "3005:3005"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3005/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Hospital Registry Service
+  hospital-registry-service:
+    build:
+      context: ./backend/hospital-registry-service
+      dockerfile: Dockerfile
+    container_name: mediar-hospital-registry-service
+    environment:
+      PORT: 3006
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mediar_db
+      DB_USER: mediar_user
+      DB_PASSWORD: mediar_password
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+    ports:
+      - "3006:3006"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3006/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Ambulance Service
+  ambulance-service:
+    build:
+      context: ./backend/ambulance-service
+      dockerfile: Dockerfile
+    container_name: mediar-ambulance-service
+    environment:
+      PORT: 3007
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mediar_db
+      DB_USER: mediar_user
+      DB_PASSWORD: mediar_password
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+    ports:
+      - "3007:3007"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3007/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Analytics Service
+  analytics-service:
+    build:
+      context: ./backend/analytics-service
+      dockerfile: Dockerfile
+    container_name: mediar-analytics-service
+    environment:
+      PORT: 3008
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mediar_db
+      DB_USER: mediar_user
+      DB_PASSWORD: mediar_password
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+    ports:
+      - "3008:3008"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3008/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # India Analytics Service (State-wise analytics and India-level dashboard)
+  india-analytics-service:
+    build:
+      context: ./backend/india-analytics-service
+      dockerfile: Dockerfile
+    container_name: mediar-india-analytics-service
+    environment:
+      PORT: 3024
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mediar_db
+      DB_USER: mediar_user
+      DB_PASSWORD: mediar_password
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+    ports:
+      - "3024:3024"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3024/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Neural-Care Service (Continuous AI Health Guardian)
+  neural-care-service:
+    build:
+      context: ./backend/neural-care-service
+      dockerfile: Dockerfile
+    container_name: mediar-neural-care-service
+    environment:
+      PORT: 3009
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mediar_db
+      DB_USER: mediar_user
+      DB_PASSWORD: mediar_password
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+    ports:
+      - "3009:3009"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3009/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Doctor Queue Service (Live Doctor Map + Walk-in Queue)
+  doctor-queue-service:
+    build:
+      context: ./backend/doctor-queue-service
+      dockerfile: Dockerfile
+    container_name: mediar-doctor-queue-service
+    environment:
+      PORT: 3010
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mediar_db
+      DB_USER: mediar_user
+      DB_PASSWORD: mediar_password
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+    ports:
+      - "3010:3010"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3010/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Voice Service (Voice-First Medical Assistant)
+  voice-service:
+    build:
+      context: ./backend/voice-service
+      dockerfile: Dockerfile
+    container_name: mediar-voice-service
+    environment:
+      PORT: 3011
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mediar_db
+      DB_USER: mediar_user
+      DB_PASSWORD: mediar_password
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+      GCP_PROJECT_ID: ${GCP_PROJECT_ID}
+      GOOGLE_CLOUD_KEYFILE: ${GOOGLE_CLOUD_KEYFILE}
+    ports:
+      - "3011:3011"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3011/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Medicine Scanner Service
+  medicine-scanner-service:
+    build:
+      context: ./backend/medicine-scanner-service
+      dockerfile: Dockerfile
+    container_name: mediar-medicine-scanner-service
+    environment:
+      PORT: 3012
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mediar_db
+      DB_USER: mediar_user
+      DB_PASSWORD: mediar_password
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+      GCP_PROJECT_ID: ${GCP_PROJECT_ID}
+      GOOGLE_CLOUD_KEYFILE: ${GOOGLE_CLOUD_KEYFILE}
+    ports:
+      - "3012:3012"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3012/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Health Score Service
+  health-score-service:
+    build:
+      context: ./backend/health-score-service
+      dockerfile: Dockerfile
+    container_name: mediar-health-score-service
+    environment:
+      PORT: 3013
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mediar_db
+      DB_USER: mediar_user
+      DB_PASSWORD: mediar_password
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+    ports:
+      - "3013:3013"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3013/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Care Circle Service
+  care-circle-service:
+    build:
+      context: ./backend/care-circle-service
+      dockerfile: Dockerfile
+    container_name: mediar-care-circle-service
+    environment:
+      PORT: 3014
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mediar_db
+      DB_USER: mediar_user
+      DB_PASSWORD: mediar_password
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+    ports:
+      - "3014:3014"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3014/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Insurance Decoder Service
+  insurance-decoder-service:
+    build:
+      context: ./backend/insurance-decoder-service
+      dockerfile: Dockerfile
+    container_name: mediar-insurance-decoder-service
+    environment:
+      PORT: 3015
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mediar_db
+      DB_USER: mediar_user
+      DB_PASSWORD: mediar_password
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+      GCP_PROJECT_ID: ${GCP_PROJECT_ID}
+      GOOGLE_CLOUD_KEYFILE: ${GOOGLE_CLOUD_KEYFILE}
+    ports:
+      - "3015:3015"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3015/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Digital Lobby Service
+  digital-lobby-service:
+    build:
+      context: ./backend/digital-lobby-service
+      dockerfile: Dockerfile
+    container_name: mediar-digital-lobby-service
+    environment:
+      PORT: 3016
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mediar_db
+      DB_USER: mediar_user
+      DB_PASSWORD: mediar_password
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+    ports:
+      - "3016:3016"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3016/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Body Scan Service (AI Medical Camera + 3D Body Scan)
+  body-scan-service:
+    build:
+      context: ./backend/body-scan-service
+      dockerfile: Dockerfile
+    container_name: mediar-body-scan-service
+    environment:
+      PORT: 3017
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mediar_db
+      DB_USER: mediar_user
+      DB_PASSWORD: mediar_password
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+    ports:
+      - "3017:3017"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3017/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nurse Avatar Service (Virtual Nurse Avatar)
+  nurse-avatar-service:
+    build:
+      context: ./backend/nurse-avatar-service
+      dockerfile: Dockerfile
+    container_name: mediar-nurse-avatar-service
+    environment:
+      PORT: 3018
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mediar_db
+      DB_USER: mediar_user
+      DB_PASSWORD: mediar_password
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+    ports:
+      - "3018:3018"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3018/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Digital Twin Service (Genomic + Lifestyle Digital Twin)
+  digital-twin-service:
+    build:
+      context: ./backend/digital-twin-service
+      dockerfile: Dockerfile
+    container_name: mediar-digital-twin-service
+    environment:
+      PORT: 3019
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mediar_db
+      DB_USER: mediar_user
+      DB_PASSWORD: mediar_password
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+    ports:
+      - "3019:3019"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3019/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Gamification Service (Gamified Health Universe)
+  gamification-service:
+    build:
+      context: ./backend/gamification-service
+      dockerfile: Dockerfile
+    container_name: mediar-gamification-service
+    environment:
+      PORT: 3020
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mediar_db
+      DB_USER: mediar_user
+      DB_PASSWORD: mediar_password
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+    ports:
+      - "3020:3020"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3020/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Doctor Co-Pilot Service (Doctor-side AI Co-Pilot)
+  doctor-copilot-service:
+    build:
+      context: ./backend/doctor-copilot-service
+      dockerfile: Dockerfile
+    container_name: mediar-doctor-copilot-service
+    environment:
+      PORT: 3021
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mediar_db
+      DB_USER: mediar_user
+      DB_PASSWORD: mediar_password
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+    ports:
+      - "3021:3021"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3021/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Medical Locker Service (Zero-Knowledge Medical Locker)
+  medical-locker-service:
+    build:
+      context: ./backend/medical-locker-service
+      dockerfile: Dockerfile
+    container_name: mediar-medical-locker-service
+    environment:
+      PORT: 3022
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mediar_db
+      DB_USER: mediar_user
+      DB_PASSWORD: mediar_password
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+    ports:
+      - "3022:3022"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3022/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Sync Service (Offline-First Micro-Health Kit)
+  sync-service:
+    build:
+      context: ./backend/sync-service
+      dockerfile: Dockerfile
+    container_name: mediar-sync-service
+    environment:
+      PORT: 3023
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mediar_db
+      DB_USER: mediar_user
+      DB_PASSWORD: mediar_password
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+    ports:
+      - "3023:3023"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3023/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: mediar-network
+

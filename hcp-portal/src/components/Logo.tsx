@@ -1,0 +1,308 @@
+'use client'
+
+import React from 'react'
+import { motion } from 'framer-motion'
+
+interface LogoProps {
+  size?: number
+  className?: string
+  glow?: boolean
+  animated?: boolean
+}
+
+export function MediARLogo({ size = 120, className = '', glow = true, animated = false }: LogoProps) {
+  const LogoContent = () => (
+    <svg 
+      width={size} 
+      height={size} 
+      viewBox="0 0 120 120" 
+      fill="none" 
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      <defs>
+        {/* Blue to Green Gradient - Main Logo Gradient */}
+        <linearGradient id="mediarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#0A84FF" /> {/* Bright blue */}
+          <stop offset="30%" stopColor="#06B6D4" /> {/* Cyan */}
+          <stop offset="60%" stopColor="#10B981" /> {/* Teal */}
+          <stop offset="100%" stopColor="#10B981" /> {/* Light green */}
+        </linearGradient>
+        
+        {/* Secondary Gradient for Arrow */}
+        <linearGradient id="arrowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#0A84FF" />
+          <stop offset="50%" stopColor="#06B6D4" />
+          <stop offset="100%" stopColor="#10B981" />
+        </linearGradient>
+        
+        {/* 3D Metallic Effect */}
+        <linearGradient id="metallicGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.8" />
+          <stop offset="30%" stopColor="#0A84FF" stopOpacity="0.9" />
+          <stop offset="70%" stopColor="#10B981" stopOpacity="0.9" />
+          <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.3" />
+        </linearGradient>
+        
+        {/* Cube Face Gradients */}
+        <linearGradient id="cubeTop" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#0A84FF" />
+          <stop offset="100%" stopColor="#06B6D4" />
+        </linearGradient>
+        
+        <linearGradient id="cubeRight" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#06B6D4" />
+          <stop offset="100%" stopColor="#10B981" />
+        </linearGradient>
+        
+        <linearGradient id="cubeFront" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#0A84FF" />
+          <stop offset="100%" stopColor="#10B981" />
+        </linearGradient>
+        
+        {/* Glow Filters */}
+        <filter id="subtleGlow">
+          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        
+        <filter id="strongGlow">
+          <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        
+        {/* 3D Shadow/Depth */}
+        <filter id="depthShadow">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+          <feOffset dx="2" dy="2" result="offsetblur"/>
+          <feComponentTransfer>
+            <feFuncA type="linear" slope="0.3"/>
+          </feComponentTransfer>
+          <feMerge>
+            <feMergeNode/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        
+        {/* Metallic shine */}
+        <filter id="metallicShine">
+          <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+      
+      {/* Outer Glow Ring */}
+      {glow && (
+        <circle 
+          cx="60" 
+          cy="60" 
+          r="56" 
+          fill="url(#mediarGradient)" 
+          opacity="0.1"
+          className={animated ? "animate-pulse" : ""}
+        />
+      )}
+      
+      {/* Heart + Question Mark Combined Shape */}
+      <g filter={glow ? "url(#strongGlow)" : undefined}>
+        {/* Heart left curve - smooth rounded */}
+        <path 
+          d="M 38 50 Q 38 38, 48 38 Q 54 38, 60 46 L 60 62 Q 60 78, 50 78 Q 44 78, 38 70"
+          fill="url(#mediarGradient)"
+          opacity="0.95"
+          filter="url(#metallicShine)"
+        />
+        
+        {/* Question mark top loop (forms right side of heart) */}
+        <path 
+          d="M 60 46 Q 66 38, 76 38 Q 82 38, 82 46 Q 82 52, 76 56 Q 72 58, 68 58"
+          fill="none"
+          stroke="url(#mediarGradient)"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        
+        {/* Question mark stem (forms right side of heart) */}
+        <path 
+          d="M 68 58 L 68 72 Q 68 78, 62 78 Q 58 78, 58 74"
+          fill="none"
+          stroke="url(#mediarGradient)"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        
+        {/* Question mark dot */}
+        <circle 
+          cx="68" 
+          cy="85" 
+          r="3.5" 
+          fill="url(#mediarGradient)"
+          filter="url(#metallicShine)"
+        />
+        
+        {/* Heart bottom point */}
+        <path 
+          d="M 38 70 Q 48 84, 58 78"
+          fill="url(#mediarGradient)"
+          opacity="0.95"
+          filter="url(#metallicShine)"
+        />
+        
+        {/* 3D Highlight on heart */}
+        <ellipse 
+          cx="50" 
+          cy="52" 
+          rx="10" 
+          ry="14" 
+          fill="url(#metallicGradient)"
+          opacity="0.5"
+        />
+        
+        {/* Heart center highlight */}
+        <circle 
+          cx="55" 
+          cy="58" 
+          r="4" 
+          fill="url(#metallicGradient)"
+          opacity="0.6"
+        />
+      </g>
+      
+      {/* Orbiting Arrow - Upward curving around the heart */}
+      <g filter={glow ? "url(#subtleGlow)" : undefined}>
+        {/* Arrow path - curves upward from bottom left, orbits around heart, to top right */}
+        <path 
+          d="M 22 88 Q 35 55, 50 42 Q 65 30, 78 28"
+          fill="none"
+          stroke="url(#arrowGradient)"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          opacity="0.95"
+        />
+        
+        {/* Arrowhead - larger and more prominent */}
+        <path 
+          d="M 75 28 L 80 26 L 78 32 L 75 30 Z"
+          fill="url(#arrowGradient)"
+          filter="url(#metallicShine)"
+        />
+        
+        {/* Arrow shaft highlight for 3D effect */}
+        <path 
+          d="M 22 88 Q 35 55, 50 42 Q 65 30, 72 28"
+          fill="none"
+          stroke="url(#metallicGradient)"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          opacity="0.7"
+        />
+        
+        {/* Arrow motion trail effect */}
+        <path 
+          d="M 22 88 Q 35 55, 50 42 Q 65 30, 78 28"
+          fill="none"
+          stroke="url(#arrowGradient)"
+          strokeWidth="5"
+          strokeLinecap="round"
+          opacity="0.15"
+        />
+      </g>
+      
+      {/* Small Cube at bottom right - below question mark dot */}
+      <g transform="translate(72, 88)" filter="url(#depthShadow)">
+        {/* Cube top face */}
+        <path 
+          d="M 0 0 L 7 -3.5 L 14 0 L 7 3.5 Z"
+          fill="url(#cubeTop)"
+          opacity="0.95"
+          filter="url(#metallicShine)"
+        />
+        
+        {/* Cube right face */}
+        <path 
+          d="M 14 0 L 17.5 3.5 L 10.5 7 L 7 3.5 Z"
+          fill="url(#cubeRight)"
+          opacity="0.9"
+          filter="url(#metallicShine)"
+        />
+        
+        {/* Cube front face */}
+        <path 
+          d="M 0 0 L 7 3.5 L 10.5 7 L 3.5 3.5 Z"
+          fill="url(#cubeFront)"
+          opacity="0.95"
+          filter="url(#metallicShine)"
+        />
+        
+        {/* Cube edge highlights for 3D effect */}
+        <path 
+          d="M 1.5 1 L 6 3 L 9.5 6.5 L 5 4.5 Z"
+          fill="url(#metallicGradient)"
+          opacity="0.6"
+        />
+        
+        {/* Cube top highlight */}
+        <path 
+          d="M 3.5 0 L 7 -1.5 L 10.5 0 L 7 1.5 Z"
+          fill="url(#metallicGradient)"
+          opacity="0.5"
+        />
+      </g>
+      
+      {/* Additional depth/shadow effects */}
+      {glow && (
+        <>
+          {/* Heart shadow */}
+          <ellipse 
+            cx="60" 
+            cy="62" 
+            rx="20" 
+            ry="15" 
+            fill="url(#mediarGradient)"
+            opacity="0.15"
+            filter="url(#strongGlow)"
+          />
+          
+          {/* Arrow motion trail */}
+          <path 
+            d="M 25 85 Q 40 50, 75 30"
+            fill="none"
+            stroke="url(#arrowGradient)"
+            strokeWidth="4"
+            strokeLinecap="round"
+            opacity="0.2"
+            filter="url(#strongGlow)"
+          />
+        </>
+      )}
+    </svg>
+  )
+
+  if (animated) {
+    return (
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.5, type: 'spring', stiffness: 200 }}
+        whileHover={{ scale: 1.05 }}
+        className="inline-block"
+      >
+        <LogoContent />
+      </motion.div>
+    )
+  }
+
+  return <LogoContent />
+}

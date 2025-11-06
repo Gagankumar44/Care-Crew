@@ -1,0 +1,25 @@
+<svg width="32" height="32" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="faviconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0A84FF" />
+      <stop offset="50%" stop-color="#6366F1" />
+      <stop offset="100%" stop-color="#8B5CF6" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="120" height="120" rx="24" fill="url(#faviconGradient)" />
+  
+  <!-- Medical Cross -->
+  <rect x="58.5" y="28" width="3" height="64" fill="#FFFFFF" rx="1.5" />
+  <rect x="28" y="58.5" width="64" height="3" fill="#FFFFFF" rx="1.5" />
+  <circle cx="60" cy="60" r="4" fill="#FFFFFF" />
+  
+  <!-- Pulse Line -->
+  <path d="M 18 60 L 28 50 L 38 60 L 43 55 L 53 65 L 60 50 L 67 65 L 77 55 L 82 60 L 92 50 L 102 60" 
+        fill="none" 
+        stroke="#FFFFFF" 
+        stroke-width="2" 
+        stroke-linecap="round"
+        opacity="0.8" />
+</svg>

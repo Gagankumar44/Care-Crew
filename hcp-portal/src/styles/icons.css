@@ -1,0 +1,101 @@
+/**
+ * Medical Icon Styles
+ * 
+ * Optimized CSS for medical icons with:
+ * - Color transitions on hover
+ * - Tailwind integration
+ * - Accessibility support
+ */
+
+/* Icon base styles */
+.medical-icon {
+  transition: all 0.2s ease-in-out;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Color transitions */
+.medical-icon:hover {
+  transform: scale(1.05);
+}
+
+.medical-icon-transition {
+  transition: stroke 0.2s ease-in-out, fill 0.2s ease-in-out;
+}
+
+/* Hover color changes */
+.medical-icon-primary:hover {
+  stroke: var(--primary-500, #0A84FF);
+}
+
+.medical-icon-health:hover {
+  stroke: var(--health-500, #34C759);
+}
+
+.medical-icon-accent:hover {
+  stroke: var(--accent-500, #5E5CE6);
+}
+
+.medical-icon-error:hover {
+  stroke: var(--error-500, #FF3B30);
+}
+
+/* Focus states for accessibility */
+.medical-icon:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .medical-icon,
+  .medical-icon-transition {
+    transition: none;
+    transform: none;
+  }
+  
+  .medical-icon:hover {
+    transform: none;
+  }
+}
+
+/* Size utilities */
+.medical-icon-xs {
+  width: 16px;
+  height: 16px;
+}
+
+.medical-icon-sm {
+  width: 20px;
+  height: 20px;
+}
+
+.medical-icon-md {
+  width: 24px;
+  height: 24px;
+}
+
+.medical-icon-lg {
+  width: 32px;
+  height: 32px;
+}
+
+.medical-icon-xl {
+  width: 48px;
+  height: 48px;
+}
+
+/* Utility classes for icons (can be used with Tailwind) */
+.icon-transition {
+  transition: stroke 0.2s ease-in-out, fill 0.2s ease-in-out;
+}
+
+.icon-hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.icon-hover-glow:hover {
+  filter: drop-shadow(0 0 4px currentColor);
+}
+

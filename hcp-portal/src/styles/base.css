@@ -1,0 +1,118 @@
+/**
+ * Base CSS for Care Crew V2
+ * Includes CSS variables from design tokens and font configuration
+ * Font Pairing: Nunito (headings) + Inter (body)
+ */
+
+/* Import Nunito for headings - rounded, friendly sans-serif */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800;900&display=swap');
+
+/* Import Inter Variable Font for body text - super-readable */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+/* Design Token CSS Variables */
+:root {
+  /* Spacing - 8px base scale */
+  --spacing-0: 0;
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-8: 64px;
+  
+  /* Border Radii */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  
+  /* Base Colors - Soft cream background */
+  --color-base-50: #FCFBF9; /* Soft off-white/cream */
+  --color-base-100: #F9F7F4;
+  --color-base-200: #F5F2ED;
+  --color-base-300: #F0ECE4;
+  
+  /* Colors - Neutrals (Warm cream spectrum) */
+  --color-neutral-50: #FCFBF9; /* Soft cream base */
+  --color-neutral-100: #F9F7F4;
+  --color-neutral-200: #F0ECE4;
+  --color-neutral-300: #E5DFD4;
+  --color-neutral-400: #D4CCC0;
+  --color-neutral-500: #A39D93;
+  --color-neutral-600: #7A7369;
+  --color-neutral-700: #5C564F;
+  --color-neutral-800: #3D3934;
+  --color-neutral-900: #262420;
+  --color-neutral-950: #1A1816;
+  
+  /* Primary - Forest/Moss Green */
+  --color-primary-500: #2C5F2D;
+  --color-primary-start: #2C5F2D; /* Forest green */
+  --color-primary-end: #1E4120;   /* Darker forest green */
+  --color-primary-gradient: linear-gradient(135deg, #2C5F2D 0%, #1E4120 100%);
+  
+  /* Secondary - Terracotta/Coral */
+  --color-secondary-500: #E07A5F;
+  --color-secondary-start: #E07A5F; /* Terracotta */
+  --color-secondary-end: #B94F35;   /* Darker terracotta */
+  --color-secondary-gradient: linear-gradient(135deg, #E07A5F 0%, #B94F35 100%);
+  
+  /* Accent - Mint/Soft Teal */
+  --color-accent-300: #99EDC3; /* Main mint/soft teal */
+  --color-accent-start: #99EDC3; /* Mint/soft teal */
+  --color-accent-end: #5ED9A7;   /* Brighter mint */
+  --color-accent-gradient: linear-gradient(135deg, #99EDC3 0%, #5ED9A7 100%);
+  
+  /* Success */
+  --color-success-500: #2C5F2D; /* Forest green for success */
+  --color-success-600: #255027;
+  
+  /* Danger */
+  --color-danger-500: #E07A5F; /* Terracotta for danger/alerts */
+  --color-danger-600: #D26345;
+  
+  /* Muted */
+  --color-muted-500: #A39D93;
+  --color-muted-600: #7A7369;
+  
+  /* Shadows */
+  --shadow-soft-card: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 4px rgba(0, 0, 0, 0.02);
+  --shadow-soft-elevated: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  
+  /* Typography - Font Pairing */
+  --font-heading: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; /* Rounded, friendly for headings */
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; /* Super-readable for body */
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; /* Alias for body */
+  --font-fallback: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+}
+
+/* Apply Inter as body font */
+body {
+  font-family: var(--font-body);
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+/* Apply Nunito to all headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: -0.02em; /* Tighter letter spacing for headings */
+}
+
+/* Preload fonts for better performance */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 300 900;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/nunito/v26/XRXI3I6Li01BKofAjsOUYevI.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}

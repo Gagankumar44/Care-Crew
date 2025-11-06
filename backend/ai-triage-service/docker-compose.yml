@@ -1,0 +1,24 @@
+services:
+  ai-triage-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - GCP_PROJECT_ID=${GCP_PROJECT_ID}
+      - VERTEX_AI_LOCATION=${VERTEX_AI_LOCATION:-us-central1}
+      - MED_GEMINI_MODEL=${MED_GEMINI_MODEL:-medlm-medium}
+      - HIPAA_ENCRYPTION_KEY=${HIPAA_ENCRYPTION_KEY}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    volumes:
+      - ./src:/app/src
+    networks:
+      - mediar-network
+
+networks:
+  mediar-network:
+    driver: bridge
+

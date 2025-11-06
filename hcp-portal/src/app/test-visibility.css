@@ -1,0 +1,135 @@
+/* Force visibility for all text content */
+section *,
+div *,
+main * {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Force text colors in dark mode */
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark h4,
+html.dark h5,
+html.dark h6 {
+  color: #ffffff !important;
+}
+
+html.dark p {
+  color: #e5e7eb !important;
+}
+
+html.dark span:not(.bg-clip-text) {
+  color: inherit !important;
+}
+
+html.dark label {
+  color: #ffffff !important;
+}
+
+html.dark input[type="text"],
+html.dark input[type="email"],
+html.dark input[type="password"] {
+  color: #ffffff !important;
+  background-color: rgba(28, 28, 28, 0.7) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Ensure gradient text is visible */
+.bg-clip-text {
+  background: linear-gradient(to right, #3b82f6, #22c55e, #a855f7) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* Ensure forms are visible */
+html.dark form,
+html.dark form * {
+  visibility: visible !important;
+}
+
+/* Fix all text colors in dark mode - comprehensive */
+html.dark .text-gray-900,
+html.dark .text-neutral-900 {
+  color: #ffffff !important;
+}
+
+html.dark .text-gray-700,
+html.dark .text-neutral-700 {
+  color: #e5e7eb !important;
+}
+
+html.dark .text-gray-600,
+html.dark .text-neutral-600 {
+  color: #d1d5db !important;
+}
+
+html.dark .text-gray-500,
+html.dark .text-neutral-500 {
+  color: #9ca3af !important;
+}
+
+html.dark .text-gray-400,
+html.dark .text-neutral-400 {
+  color: #9ca3af !important;
+}
+
+html.dark .text-gray-300,
+html.dark .text-neutral-300 {
+  color: #d1d5db !important;
+}
+
+/* Ensure buttons are visible and clickable */
+html.dark button,
+html.dark a {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Ensure inputs are visible */
+html.dark input,
+html.dark textarea,
+html.dark select {
+  color: #ffffff !important;
+  background-color: rgba(28, 28, 28, 0.7) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #6b7280 !important;
+}
+
+/* Fix links */
+html.dark a {
+  color: inherit !important;
+}
+
+html.dark a:hover {
+  opacity: 0.8 !important;
+}
+
+/* Ensure all cards and containers are visible */
+html.dark .glass-card,
+html.dark .glass {
+  background: rgba(28, 28, 28, 0.7) !important;
+  backdrop-filter: blur(40px) !important;
+}
+
+/* Ensure all buttons are clickable and visible */
+html.dark button[type="submit"],
+html.dark button[type="button"] {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+/* Fix navigation and routing */
+html.dark a,
+html.dark Link {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
